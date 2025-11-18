@@ -1,40 +1,83 @@
 class ColaPrioridadPacientes {
+   private Paciente[] arr;
+   private int tamano;
+   private int capacidad;
 
-    private Paciente[] arr;   // Arreglo del heap
-    private int tamano;       // Cantidad de elementos
-    private int capacidad;    // Capacidad del arreglo
 
-    public ColaPrioridadPacientes() {
-        capacidad = 100;
-        arr = new Paciente[capacidad];
-        tamano = 0;
-    }
+   public ColaPrioridadPacientes() {
+       capacidad = 100;
+       arr = new Paciente[capacidad];
+       tamano = 0;
+   }
 
-    // Duplica el arreglo si se llena
-    private void asegurarCapacidad() {
-        if (tamano == capacidad) {
-            Paciente[] nuevo = new Paciente[capacidad * 2];
-            System.arraycopy(arr, 0, nuevo, 0, capacidad);
-            arr = nuevo;
-            capacidad *= 2;
-        }
-    }
 
-    public boolean estaVacia() { return tamano == 0; }
+   private void asegurar() {
+       if (tamano == capacidad) {
+           Paciente[] n = new Paciente[capacidad * 2];
+           System.arraycopy(arr, 0, n, 0, capacidad);
+           arr = n;
+           capacidad *= 2;
+       }
+   }
 
-    // Inserta un paciente y hace "subir" según prioridad
-    public void insertar(Paciente p) {
-        asegurarCapacidad();
-        arr[tamano] = p;
-        subir(tamano);
-        tamano++;
-    }
 
-    // Retorna el de mayor prioridad sin removerlo
-    public Paciente obtenerMin() {
-        if (tamano == 0) return null;
-        return arr[0];
-    }
+   public boolean estaVacia() { return tamano == 0; }
+
+
+   public void insertar(Paciente p) {
+       asegurar();
+       arr[tamano] = p;
+       subir(tamano);
+       tamano++;
+   }
+
+
+   public Paciente obtenerMin() {
+       if (tamano == 0) return null;
+       return arr[0];
+   }
+
+
+   public Paciente extraerMin() {
+       if (tamano == 0) return null;
+       Paciente m = arr[0];
+       arr[0] = arr[tamano - 1];
+       tamano--;
+       bajar(0);
+       return m;
+   }
+
+
+   private void subir(int i) {
+       while (i > 0) {
+           int p = (i - 1) / 2;
+           if (arr[i].compareTo(arr[p]) < 0) {
+               Paciente t = arr[i];
+               arr[i] = arr[p];
+               arr[p] = t;
+               i = p;
+           } else break;
+       }
+   }
+
+
+   private void bajar(int i) {
+       while (true) {
+           int izq = 2*i+1, der = 2*i+2, menor = i;
+           if (izq < tamano && arr[izq].compareTo(arr[menor]) < 0) menor = izq;
+           if (der < tamano && arr[der].compareTo(arr[menor]) < 0) menor = der;
+           if (menor != i) {
+               Paciente t = arr[i];
+               arr[i] = arr[menor];
+               arr[menor] = t;
+               i = menor;
+           } else break;
+       }
+   }
+}
+
+
+
 
     // Extrae al paciente prioritario y reordena el heap
     public Paciente extraerMin() {
