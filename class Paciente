@@ -1,0 +1,39 @@
+import java.util.*;
+
+
+public class Paciente implements Comparable<Paciente> {
+   private String id;
+   private String nombre;
+   private int categoria;
+   private long tiempoLlegada;
+   private Stack<String> historialCambios;
+
+
+   public Paciente(String id, String nombre, int categoria, long tiempoLlegada) {
+       this.id = id;
+       this.nombre = nombre;
+       this.categoria = categoria;
+       this.tiempoLlegada = tiempoLlegada;
+       this.historialCambios = new Stack<>();
+   }
+
+
+   public void registrarCambio(String d) { historialCambios.push(d); }
+   public String getId() { return id; }
+   public String getNombre() { return nombre; }
+   public int getCategoria() { return categoria; }
+   public long getTiempoLlegada() { return tiempoLlegada; }
+   public Stack<String> getHistorialCambios() { return historialCambios; }
+   public void setCategoria(int c) { categoria = c; }
+
+
+   @Override
+   public int compareTo(Paciente o) {
+       if (categoria != o.categoria) return Integer.compare(categoria, o.categoria);
+       return Long.compare(tiempoLlegada, o.tiempoLlegada);
+   }
+}
+
+
+
+
