@@ -1,0 +1,140 @@
+class HashPacientesSondeoLineal implements Map<String, Paciente> {
+
+
+   private static class Slot {
+       String clave;
+       Paciente valor;
+       boolean eliminado;
+       Slot(String c, Paciente v) { clave=c; valor=v; eliminado=false; }
+   }
+
+
+   private Slot[] tabla;
+   private int m;
+
+
+   public HashPacientesSondeoLineal(int m) {
+       this.m=m;
+       tabla=new Slot[m];
+   }
+
+
+   private int hash(String s) {
+       int h=0;
+       for (int i=0;i<s.length();i++) h=(31*h+s.charAt(i))%m;
+       return Math.abs(h);
+   }
+
+
+   @Override
+   public Paciente put(String id, Paciente p) {
+       int idx=hash(id), inicio=idx, borr=-1;
+
+
+       while(true){
+           Slot s=tabla[idx];
+           if(s==null){
+               if(borr!=-1) idx=borr;
+               tabla[idx]=new Slot(id,p);
+               return null;
+           }
+           if(s.eliminado){
+               if(borr==-1) borr=idx;
+           } else if(s.clave.equals(id)){
+               Paciente old=s.valor;
+               s.valor=p;
+               return old;
+           }
+           idx=(idx+1)%m;
+           if(idx==inicio) return null;
+       }
+   }
+
+
+   @Override
+   public Paciente get(Object key) {
+       if(!(key instanceof String)) return null;
+       String id=(String)key;
+       int idx=hash(id),inicio=idx;
+       while(true){
+           Slot s=tabla[idx];
+           if(s==null) return null;
+           if(!s.eliminado && s.clave.equals(id)) return s.valor;
+           idx=(idx+1)%m;
+           if(idx==inicio) return null;
+       }
+   }
+
+
+   @Override
+   public Paciente remove(Object key) {
+       if(!(key instanceof String)) return null;
+       String id=(String)key;
+       int idx=hash(id),inicio=idx;
+       while(true){
+           Slot s=tabla[idx];
+           if(s==null) return null;
+           if(!s.eliminado && s.clave.equals(id)){
+               s.eliminado=true;
+               return s.valor;
+           }
+           idx=(idx+1)%m;
+           if(idx==inicio) return null;
+       }
+   }
+
+
+   @Override public int size(){int c=0;for(Slot s:tabla)if(s!=null&&!s.eliminado)c++;return c;}
+   @Override public boolean isEmpty(){return size()==0;}
+   @Override public boolean containsKey(Object k){return get(k)!=null;}
+
+
+   @Override public boolean containsValue(Object v){
+       if(!(v instanceof Paciente))return false;
+       for(Slot s:tabla)if(s!=null&&!s.eliminado&&s.valor.equals(v))return true;
+       return false;
+   }
+
+
+   @Override public void clear(){Arrays.fill(tabla,null);}
+
+
+   @Override
+   public Set<String> keySet(){
+       HashSet<String> s=new HashSet<>();
+       for(Slot sl:tabla)if(sl!=null&&!sl.eliminado)s.add(sl.clave);
+       return s;
+   }
+
+
+   @Override
+   public Collection<Paciente> values(){
+       ArrayList<Paciente> a=new ArrayList<>();
+       for(Slot sl:tabla)if(sl!=null&&!sl.eliminado)a.add(sl.valor);
+       return a;
+   }
+
+
+   @Override
+   public Set<Entry<String, Paciente>> entrySet(){
+       HashSet<Entry<String, Paciente>> s=new HashSet<>();
+       for(Slot sl:tabla)if(sl!=null&&!sl.eliminado){
+           final String k=sl.clave;final Paciente v=sl.valor;
+           s.add(new Entry<String, Paciente>(){
+               public String getKey(){return k;}
+               public Paciente getValue(){return v;}
+               public Paciente setValue(Paciente val){return null;}
+           });
+       }
+       return s;
+   }
+
+
+   @Override
+   public void putAll(Map<? extends String, ? extends Paciente> m0){
+       for(Entry<? extends String, ? extends Paciente> e:m0.entrySet())
+           put(e.getKey(), e.getValue());
+   }
+}
+
+
