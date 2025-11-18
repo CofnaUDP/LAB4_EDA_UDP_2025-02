@@ -1,0 +1,34 @@
+class Hospital {
+   private Map<String, Paciente> salaEspera;
+   private ColaPrioridadPacientes colaAtencion;
+   private ArbolPacientes historico;
+
+
+   public Hospital(HashPacientesEncadenado s) {
+       salaEspera=s;
+       colaAtencion=new ColaPrioridadPacientes();
+       historico=new ArbolPacientes();
+   }
+
+
+   public void registrarPaciente(Paciente p){
+       salaEspera.put(p.getId(),p);
+       colaAtencion.insertar(p);
+   }
+
+
+   public Paciente atenderSiguiente(){
+       Paciente p=colaAtencion.extraerMin();
+       if(p!=null){
+           salaEspera.remove(p.getId());
+           historico.insertar(p);
+       }
+       return p;
+   }
+
+
+   public Paciente buscarPacienteActivo(String id){return salaEspera.get(id);}
+   public Paciente buscarPacienteHistorico(String id){return historico.buscar(id);}
+}
+
+
