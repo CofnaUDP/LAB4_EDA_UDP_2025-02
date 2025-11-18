@@ -1,0 +1,55 @@
+class ArbolPacientes {
+
+
+   private static class Nodo {
+       Paciente p;
+       Nodo izq, der;
+       Nodo(Paciente p){this.p=p;}
+   }
+
+
+   private Nodo raiz;
+
+
+   public void insertar(Paciente p) { raiz=ins(raiz,p); }
+
+
+   private Nodo ins(Nodo n, Paciente p){
+       if(n==null) return new Nodo(p);
+       int c=p.getId().compareTo(n.p.getId());
+       if(c<0) n.izq=ins(n.izq,p);
+       else if(c>0) n.der=ins(n.der,p);
+       else n.p=p;
+       return n;
+   }
+
+
+   public Paciente buscar(String id){
+       Nodo n=raiz;
+       while(n!=null){
+           int c=id.compareTo(n.p.getId());
+           if(c==0)return n.p;
+           n = c<0 ? n.izq : n.der;
+       }
+       return null;
+   }
+
+
+   public List<Paciente> obtenerPacientesEnOrden(){
+       ArrayList<Paciente> l=new ArrayList<>();
+       in(raiz,l);
+       return l;
+   }
+
+
+   private void in(Nodo n,List<Paciente>l){
+       if(n==null)return;
+       in(n.izq,l);
+       l.add(n.p);
+       in(n.der,l);
+   }
+}
+
+
+
+
