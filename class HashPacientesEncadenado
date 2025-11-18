@@ -1,0 +1,61 @@
+class HashPacientesEncadenado implements Map<String, Paciente> {
+
+    private static class Par {
+        String clave;
+        Paciente valor;
+        Par(String c, Paciente v) { clave = c; valor = v; }
+    }
+
+    private LinkedList<Par>[] tabla;
+    private int m;
+
+    @SuppressWarnings("unchecked")
+    public HashPacientesEncadenado(int m) {
+        this.m = m;
+        tabla = new LinkedList[m];
+        for (int i = 0; i < m; i++)
+            tabla[i] = new LinkedList<>();
+    }
+    private int hash(String s) {
+        int h = 0;
+        for (int i = 0; i < s.length(); i++)
+            h = (31*h + s.charAt(i)) % m;
+        return Math.abs(h);
+    }
+
+    @Override
+    public Paciente put(String id, Paciente p) {
+        int pos = hash(id);
+        for (Par par : tabla[pos]) {
+            if (par.clave.equals(id)) {
+                Paciente old = par.valor;
+                par.valor = p;
+                return old;
+            }
+        }
+        tabla[pos].add(new Par(id, p));
+        return null;
+    }
+
+    @Override
+    public Paciente get(Object key) {
+        if (!(key instanceof String)) return null;
+        String id = (String) key;
+        int pos = hash(id);
+        for (Par par : tabla[pos])
+            if (par.clave.equals(id)) return par.valor;
+        return null;
+    }
+
+    @Override
+    public Paciente remove(Object key) {
+        if (!(key instanceof String)) return null;
+        String id = (String) key;
+        int pos = hash(id);
+
+        for (int i = 0; i < tabla[pos].size(); i++) {
+            if (tabla[pos].get(i).clave.equals(id))
+                return tabla[pos].remove(i).valor;
+        }
+        return null;
+    }
