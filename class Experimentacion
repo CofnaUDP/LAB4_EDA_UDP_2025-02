@@ -1,0 +1,246 @@
+public class Experimentacion {
+
+
+   public static void main(String[] args) {
+       exp1();
+       exp2();
+       exp3();
+       exp4();
+   }
+
+
+   private static void exp1() {
+       int[] N={10000,50000,100000,250000,500000,750000,1000000};
+       Random r=new Random(42);
+       System.out.println("EXP1;N;ns_insert;ns_extract");
+
+
+       for(int n:N){
+           ColaPrioridadPacientes c=new ColaPrioridadPacientes();
+           long t1=System.nanoTime();
+           for(int i=0;i<n;i++) c.insertar(new Paciente("P"+i,"Pac"+i,1+r.nextInt(5),i));
+           long t2=System.nanoTime();
+
+
+           long t3=System.nanoTime();
+           while(!c.estaVacia()) c.extraerMin();
+           long t4=System.nanoTime();
+
+
+           System.out.println("EXP1;"+n+";"+(t2-t1)+";"+(t4-t3));
+       }
+   }
+
+
+   private static void exp2() {
+       int M=10007, L=1000;
+       HashPacientesEncadenado enc=new HashPacientesEncadenado(M);
+       HashPacientesSondeoLineal lin=new HashPacientesSondeoLineal(M);
+       ArrayList<String> ids=new ArrayList<>();
+       Random r=new Random(42);
+
+
+       System.out.println("EXP2;N;put_enc;get_enc;put_lin;get_lin");
+
+
+       int tot=0;
+       while(tot<9000){
+           ArrayList<Paciente> ns=new ArrayList<>();
+           for(int i=0;i<L;i++){
+               int x=tot+i;
+               ns.add(new Paciente("H"+x,"Pac"+x,1+r.nextInt(5),x));
+           }
+
+
+           long a1=System.nanoTime();
+           for(Paciente p:ns) enc.put(p.getId(),p);
+           long a2=System.nanoTime();
+
+
+           long b1=System.nanoTime();
+           for(Paciente p:ns) lin.put(p.getId(),p);
+           long b2=System.nanoTime();
+
+
+           for(Paciente p:ns) ids.add(p.getId());
+           tot+=L;
+
+
+           ArrayList<String> q=new ArrayList<>();
+           for(int i=0;i<1000;i++) q.add(ids.get(r.nextInt(ids.size())));
+
+
+           long a3=System.nanoTime();
+           for(String id:q) enc.get(id);
+           long a4=System.nanoTime();
+
+
+           long b3=System.nanoTime();
+           for(String id:q) lin.get(id);
+           long b4=System.nanoTime();
+
+
+           System.out.println("EXP2;"+tot+";"+(a2-a1)+";"+(a4-a3)+";"+(b2-b1)+";"+(b4-b3));
+       }
+   }
+
+
+   private static void exp3() {
+       int[] N={10000,50000,100000,500000,1000000};
+       int K=10000, M=10007;
+       Random r=new Random(42);
+
+
+       System.out.println("EXP3;tipo;N;put_hash;get_hash;put_bst;get_bst");
+
+
+       for(int n:N){
+
+
+           ArrayList<Integer> ord=new ArrayList<>();
+           for(int i=0;i<n;i++) ord.add(i);
+           Collections.shuffle(ord,r);
+
+
+           HashPacientesEncadenado h=new HashPacientesEncadenado(M);
+           ArbolPacientes b=new ArbolPacientes();
+
+
+           long h1=System.nanoTime();
+           for(int x:ord) h.put("R"+x,new Paciente("R"+x,"Pac"+x,1+(x%5),0));
+           long h2=System.nanoTime();
+
+
+           long b1=System.nanoTime();
+           for(int x:ord) b.insertar(new Paciente("R"+x,"Pac"+x,1+(x%5),0));
+           long b2=System.nanoTime();
+
+
+           ArrayList<String> qs=new ArrayList<>();
+           for(int i=0;i<K;i++) qs.add("R"+ord.get(r.nextInt(ord.size())));
+
+
+           long h3=System.nanoTime();
+           for(String id:qs) h.get(id);
+           long h4=System.nanoTime();
+
+
+           long b3=System.nanoTime();
+           for(String id:qs) b.buscar(id);
+           long b4=System.nanoTime();
+
+
+           System.out.println("EXP3;PROM;"+n+";"+(h2-h1)+";"+(h4-h3)+";"+(b2-b1)+";"+(b4-b3));
+
+
+           HashPacientesEncadenado h2t=new HashPacientesEncadenado(M);
+           ArbolPacientes b2t=new ArbolPacientes();
+
+
+           long h5=System.nanoTime();
+           for(int x=0;x<n;x++) h2t.put("Q"+x,new Paciente("Q"+x,"Pac"+x,1+(x%5),0));
+           long h6=System.nanoTime();
+
+
+           long b5=System.nanoTime();
+           for(int x=0;x<n;x++) b2t.insertar(new Paciente("Q"+x,"Pac"+x,1+(x%5),0));
+           long b6=System.nanoTime();
+
+
+           ArrayList<String> qs2=new ArrayList<>();
+           for(int i=0;i<K;i++) qs2.add("Q"+r.nextInt(n));
+
+
+           long h7=System.nanoTime();
+           for(String id:qs2) h2t.get(id);
+           long h8=System.nanoTime();
+
+
+           long b7=System.nanoTime();
+           for(String id:qs2) b2t.buscar(id);
+           long b8=System.nanoTime();
+
+
+           System.out.println("EXP3;PEOR;"+n+";"+(h6-h5)+";"+(h8-h7)+";"+(b6-b5)+";"+(b8-b7));
+       }
+   }
+
+
+   private static void exp4() {
+       Random r=new Random(42);
+       sim("EXP4A",10,15,r);
+       sim("EXP4B",8,15,r);
+   }
+
+
+   private static int cat(Random r) {
+       double u=r.nextDouble();
+       if(u<0.10)return 1;
+       if(u<0.25)return 2;
+       if(u<0.43)return 3;
+       if(u<0.70)return 4;
+       return 5;
+   }
+
+
+   private static void sim(String nombre,int lleg,int ate,Random r){
+       int mins=1440;
+
+
+       HashPacientesEncadenado sala=new HashPacientesEncadenado(5000);
+       ColaPrioridadPacientes cola=new ColaPrioridadPacientes();
+
+
+       int totalL=0,totalA=0;
+       long sE=0;
+
+
+       int[] Lc=new int[6];
+       int[] Ac=new int[6];
+       long[] Es=new long[6];
+
+
+       int id=0;
+
+
+       System.out.println(nombre+";L;A;prom");
+
+
+       for(int t=0;t<mins;t++){
+           if(t%lleg==0){
+               int c=cat(r);
+               Paciente p=new Paciente(nombre+"_"+id,"Pac"+id,c,t);
+               sala.put(p.getId(),p);
+               cola.insertar(p);
+               totalL++;
+               Lc[c]++;
+               id++;
+           }
+
+
+           if(t%ate==0){
+               if(!cola.estaVacia()){
+                   Paciente p=cola.extraerMin();
+                   sala.remove(p.getId());
+                   int c=p.getCategoria();
+                   int w=t-(int)p.getTiempoLlegada();
+                   Ac[c]++;
+                   Es[c]+=w;
+                   totalA++;
+                   sE+=w;
+               }
+           }
+       }
+
+
+       double prom=totalA>0?(double)sE/totalA:0;
+       System.out.println(nombre+";"+totalL+";"+totalA+";"+prom);
+
+
+       for(int c=1;c<=5;c++){
+           int pend=Lc[c]-Ac[c];
+           double pc=Ac[c]>0?(double)Es[c]/Ac[c]:0;
+           System.out.println(nombre+"_C;"+c+";"+Lc[c]+";"+Ac[c]+";"+pend+";"+pc);
+       }
+   }
+}
